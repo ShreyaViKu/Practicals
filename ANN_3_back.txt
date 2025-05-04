@@ -77,6 +77,11 @@ for epoch in range(epochs):
 
 # ----- Step 5: Display Final Predictions -----
 
-print("\n--- Final Output after Training ---")
-for i, (inp, pred, actual) in enumerate(zip(inputs, final_output, expected_output)):
-    print(f"Input: {inp} => Predicted: {pred[0]:.4f} | Actual: {actual[0]} | Error: {abs(actual[0] - pred[0]):.4f}")
+print("\nFinal Results after Training:")
+for i in range(len(inputs)):
+    input_vals = inputs[i]
+    predicted = final_output[i][0]
+    actual = expected_output[i][0]
+    error = abs(actual - predicted)
+
+    print(f"Input: {input_vals} → Predicted: {predicted:.2f}, Actual: {actual}, Error: {error:.2f}")
