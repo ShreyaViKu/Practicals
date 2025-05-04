@@ -1,0 +1,51 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 🔹 Sample binary input data (can be 0s and 1s)
+data = np.array([
+    [1, 1],
+    [1, 0],
+    [0, 1],
+    [0, 0],
+    [1, 1],
+])
+
+# 🔹 ART1 Parameters
+vigilance = 0.8  # Similarity threshold
+clusters = []    # To store cluster prototypes
+assignments = [] # To store which cluster each point goes to
+
+# 🔹 Function to calculate similarity (match)
+def similarity(x, y):
+    return np.sum(np.logical_and(x, y)) / np.sum(x)
+
+# 🔹 ART1 Algorithm (simplified for learning)
+for idx, point in enumerate(data):
+    assigned = False
+    for i, cluster in enumerate(clusters):
+        sim = similarity(point, cluster)
+        if sim >= vigilance:
+            assignments.append(i)
+            print(f"Point {idx} {point.tolist()} assigned to Cluster {i} (Similarity: {sim:.2f})")
+            assigned = True
+            break
+    if not assigned:
+        clusters.append(point)
+        assignments.append(len(clusters) - 1)
+        print(f"Point {idx} {point.tolist()} starts new Cluster {len(clusters) - 1}")
+
+# 🔹 Plotting the clusters
+colors = ['red', 'blue', 'green', 'orange', 'purple']
+plt.figure(figsize=(6, 5))
+
+for i, point in enumerate(data):
+    cluster_id = assignments[i]
+    plt.scatter(point[0], point[1], color=colors[cluster_id], label=f"Pt {i} → C{cluster_id}")
+    plt.text(point[0] + 0.05, point[1], f"C{cluster_id}", fontsize=9)
+
+plt.title("ART1 Clustering - Visual Output")
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.grid(True)
+plt.legend()
+plt.show()
