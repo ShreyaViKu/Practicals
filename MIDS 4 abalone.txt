@@ -1,0 +1,100 @@
+MIDS 4
+# Import necessary libraries
+import pandas as pd                       # For data loading and handling
+import numpy as np                        # For numerical operations
+import matplotlib.pyplot as plt           # For visualization
+import seaborn as sns                     # For better visual plots
+
+# Import ML Tools
+from sklearn.model_selection import train_test_split    # For splitting data
+from sklearn.preprocessing import LabelEncoder          # For encoding categorical data
+from sklearn.linear_model import LogisticRegression, LinearRegression   # Models for Classification and Regression
+from sklearn.metrics import (accuracy_score, classification_report, confusion_matrix,
+                             mean_squared_error, r2_score)              # For evaluation
+
+# For uploading CSV file manually
+from google.colab import files
+uploaded = files.upload()
+
+# Replace with the actual filename after upload
+filename = list(uploaded.keys())[0]
+data = pd.read_csv(filename)
+
+#  View first 5 rows
+print(" First 5 rows of the dataset:")
+print(data.head())
+
+#  Step 2: Preprocess the data
+# Convert 'Sex' (categorical) into numerical using One-Hot Encoding
+data = pd.get_dummies(data, columns=["Sex"], drop_first=True)
+
+#  Step 3: Predict number of Rings using Classification
+
+# Set Features (X) and Target (y) for Classification
+X_classification = data.drop("Rings", axis=1)   # Features: Drop 'Rings'
+y_classification = data["Rings"]                # Target: Rings
+
+# Split data into Training and Testing sets
+X_train_c, X_test_c, y_train_c, y_test_c = train_test_split(X_classification, y_classification,
+                                                            test_size=0.2, random_state=42)
+
+#  Build Logistic Regression Model
+classifier = LogisticRegression(max_iter=1000)   # Increase max_iter if model needs more iterations
+classifier.fit(X_train_c, y_train_c)              # Train the model
+
+#  Predict on test set
+y_pred_c = classifier.predict(X_test_c)
+
+# Evaluate Classification Model
+print("\nClassification Report (Predicting Rings):")
+print(classification_report(y_test_c, y_pred_c))  # Detailed performance report
+
+print("Accuracy Score:", accuracy_score(y_test_c, y_pred_c))  # Simple accuracy
+
+# Confusion Matrix Visualization
+conf_matrix_c = confusion_matrix(y_test_c, y_pred_c)
+plt.figure(figsize=(12, 8))
+sns.heatmap(conf_matrix_c, annot=False, cmap="coolwarm")
+plt.title("Confusion Matrix for Rings Classification")
+plt.xlabel("Predicted Rings")
+plt.ylabel("Actual Rings")
+plt.show()
+
+#  Step 4: Predict Age using Regression
+
+#  Create a new column 'Age' (because Age = Rings + 1.5)
+data["Age"] = data["Rings"] + 1.5
+
+#  Set Features (X) and Target (y) for Regression
+X_regression = data.drop(["Rings", "Age"], axis=1)  # Features: drop 'Rings' and 'Age'
+y_regression = data["Age"]                          # Target: Age
+
+# Split data into Training and Testing sets
+X_train_r, X_test_r, y_train_r, y_test_r = train_test_split(X_regression, y_regression,
+                                                            test_size=0.2, random_state=42)
+
+# Build Linear Regression Model
+regressor = LinearRegression()
+regressor.fit(X_train_r, y_train_r)  # Train the model
+
+# Predict on test set
+y_pred_r = regressor.predict(X_test_r)
+
+# Evaluate Regression Model
+mse_r = mean_squared_error(y_test_r, y_pred_r)   # How much error
+r2_r = r2_score(y_test_r, y_pred_r)               # How good model fits (best is 1.0)
+
+print("\n Regression Results (Predicting Age):")
+print(f" Mean Squared Error (MSE): {mse_r:.2f}")
+print(f" R-squared (R² Score): {r2_r:.2f}")
+
+#  Plot Actual vs Predicted Age
+plt.figure(figsize=(8, 5))
+plt.scatter(y_test_r, y_pred_r, alpha=0.7, color='green')  # Scatter plot
+plt.xlabel("Actual Age")
+plt.ylabel("Predicted Age")
+plt.title(" Actual vs Predicted Age")
+plt.grid(True)
+plt.show()
+
+

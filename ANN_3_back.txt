@@ -1,0 +1,82 @@
+import numpy as np  # For matrix operations
+
+# ----- Step 1: Define Activation Functions -----
+
+def sigmoid(x):
+    """Sigmoid activation function: squashes input between 0 and 1"""
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    """Derivative of sigmoid: needed for backpropagation"""
+    return x * (1 - x)
+
+# ----- Step 2: Define Training Data -----
+
+# XOR inputs: 4 samples with 2 binary inputs
+inputs = np.array([[0, 0],
+                   [0, 1],
+                   [1, 0],
+                   [1, 1]])
+
+# XOR expected outputs: should learn to output 0 if inputs are same, 1 otherwise
+expected_output = np.array([[0],
+                            [1],
+                            [1],
+                            [0]])
+
+# ----- Step 3: Network Parameters -----
+
+input_layer_neurons = 2     # Number of input neurons (based on XOR input)
+hidden_layer_neurons = 2    # Number of hidden layer neurons (can be tuned)
+output_neurons = 1          # Number of output neurons (binary output for XOR)
+
+# Set seed for reproducible random values
+np.random.seed(1)
+
+# Random initialization of weights and biases
+hidden_weights = np.random.uniform(size=(input_layer_neurons, hidden_layer_neurons))  # 2x2 weights from input to hidden
+output_weights = np.random.uniform(size=(hidden_layer_neurons, output_neurons))       # 2x1 weights from hidden to output
+
+hidden_bias = np.random.uniform(size=(1, hidden_layer_neurons))  # Bias for each hidden neuron
+output_bias = np.random.uniform(size=(1, output_neurons))        # Bias for output neuron
+
+# ----- Step 4: Training the Network -----
+
+learning_rate = 0.5  # Controls weight update speed
+epochs = 10000       # Number of training iterations
+
+for epoch in range(epochs):
+    # --- Forward Propagation ---
+
+    # Step 1: Input to hidden layer
+    hidden_input = np.dot(inputs, hidden_weights) + hidden_bias
+    hidden_output = sigmoid(hidden_input)  # Activation function on hidden layer
+
+    # Step 2: Hidden to output layer
+    final_input = np.dot(hidden_output, output_weights) + output_bias
+    final_output = sigmoid(final_input)  # Final prediction
+
+    # --- Backward Propagation ---
+
+    # Step 3: Calculate output layer error and gradient
+    error = expected_output - final_output  # Difference from actual output
+    d_output = error * sigmoid_derivative(final_output)
+
+    # Step 4: Calculate hidden layer error and gradient
+    error_hidden = d_output.dot(output_weights.T)
+    d_hidden = error_hidden * sigmoid_derivative(hidden_output)
+
+    # --- Update Weights and Biases ---
+
+    # Update weights and biases using gradients
+    output_weights += hidden_output.T.dot(d_output) * learning_rate
+    output_bias += np.sum(d_output, axis=0, keepdims=True) * learning_rate
+
+    hidden_weights += inputs.T.dot(d_hidden) * learning_rate
+    hidden_bias += np.sum(d_hidden, axis=0, keepdims=True) * learning_rate
+
+# ----- Step 5: Display Final Predictions -----
+
+print("\n--- Final Output after Training ---")
+for i, (inp, pred, actual) in enumerate(zip(inputs, final_output, expected_output)):
+    print(f"Input: {inp} => Predicted: {pred[0]:.4f} | Actual: {actual[0]} | Error: {abs(actual[0] - pred[0]):.4f}")

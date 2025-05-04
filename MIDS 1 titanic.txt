@@ -1,0 +1,62 @@
+MIDS 1
+# Importing necessary libraries
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+
+# Load the dataset from the uploaded CSV file
+from google.colab import files
+
+# This will open a file chooser window in Colab
+uploaded = files.upload()
+import pandas as pd
+
+# Replace the filename with the name of your uploaded file
+df = pd.read_csv("titanic_1.csv")
+
+# Display the first few rows to understand the structure of the dataset
+print("Initial Data Preview:\n", df.head())
+
+# Check for missing values in each column
+print("\nMissing Values:\n", df.isnull().sum())
+
+# Drop columns that are not useful or have too many missing values
+# 'Name' and 'Ticket' are unlikely to help in prediction
+# 'Cabin' has too many missing values, so we drop it
+df.drop(['Name', 'Ticket', 'Cabin'], axis=1, inplace=True)
+
+# Fill missing values:
+# Age: Replace with median (better than mean due to possible outliers)
+df['Age'].fillna(df['Age'].median(), inplace=True)
+
+# Embarked: Replace missing values with mode (most frequent category)
+df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)
+
+# Check again to make sure no missing values remain
+print("\nMissing Values After Cleaning:\n", df.isnull().sum())
+
+# Encode categorical variables using LabelEncoder
+le = LabelEncoder()
+
+# 'Sex' and 'Embarked' are categorical features
+df['Sex'] = le.fit_transform(df['Sex'])          # male/female → 0/1
+df['Embarked'] = le.fit_transform(df['Embarked'])  # S, C, Q → 0, 1, 2
+
+# Check the data types and confirm transformation
+print("\nData Types After Encoding:\n", df.dtypes)
+
+# Separate the target variable ('Survived') and features
+X = df.drop('Survived', axis=1)
+y = df['Survived']
+
+# Split the dataset into training and testing sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Show shape of training and testing sets
+print("\nTraining Features Shape:", X_train.shape)
+print("Testing Features Shape:", X_test.shape)
+print("Training Labels Shape:", y_train.shape)
+print("Testing Labels Shape:", y_test.shape)
+
+
